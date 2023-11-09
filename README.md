@@ -504,6 +504,11 @@ exit
 
     
  ![http](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/909719f6-7bd3-441a-9faa-777af1a1064e)
+
+
+
+
+ # Thank you.
   
 
 
