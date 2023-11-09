@@ -272,15 +272,169 @@ sudo rm -rf latest.tar.gz
 ![SELinux](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/2c6956ac-5a79-4f79-8737-47916a56d343)
 
 
+# SETTING UP THE DATABASE SERVER .
+
+ First ids the creation of volumes and attacching the columes to instance created as in the case 
+ 
+ of the webserver .
+
+ 
+ ![db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/b43d5bf2-2baf-4941-b843-176afd5ef1b9)
+ 
+
+  Later the ssh connection is done to the terminal so as to be able to set up the database and 
   
-   
+  run all the necessary commands on the ternminal.
 
+  ![ssh db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/19338a6f-6e35-407d-bab2-32f6930bf7b3)
+
+  
+
+   Sudo lsblk a command is run to check al, the block that have been created as well as the  
    
+   ls /dev command is run to the list of all available blocks.
+
+   ![lsblk ls dev db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/86a4ec6e-f180-4a99-8e47-5e879cdd74cc)
+
+
+ df -h is a command that is used to help us get to know all the soace that is availablre for use for the database set up.
+ 
+![df -h db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/d00274cf-efe9-4b6b-9b90-853ee16234a4)
+
+
+  Each disk needs a partition to be created and the command  sudo gdisk is used for all the blocks that have been creates eruniing as 
+  - sudo gdisk /dev/xvdf
+
+    ![gdisk 1 db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/5b241c56-a886-4a89-9c1f-59f097166e84)
+
+
+  - sudo gdisk /dev/xvdg
+
+    ![gdisk2 db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/89b6bdfa-0981-45b2-b214-e0419a8531a2)
+
+
+  - sudo gdisk /dev/xvdh
+
+    ![gdisk 3 db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/672f0a9e-2bc4-4a23-9390-c86f74cc81b2)
+
+
+     lsblk is used as a command to check allthe newly created partitions as shown on the screen shot below.
+
+    ![lsblk](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/ba6a4545-bb11-4324-a24d-f78096781495)
+
+
+As it is with the webserver in the database server as well we need to install lvm2  and using the command  sudo lvmdiskscan, we are able to check  the available partitions.
+
+
+
+
+
+ After the disk have been created, tthey can now be set as physical volumes using the three command s below jst as it was with the webserver .
+ - sudo pvcreate /dev/xvdf1
+   
+-  sudo pvcreate /dev/xvdg1
+  
+-  sudo pvcreate /dev/xvdh1
+
+  and to veryfy that all the 3 pvs have been created sucessfully hte command sudo pvs is used .
+
+  ![pvs](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/2d6e4b4d-7ad1-4ca5-ba37-ee44eb462238)
+
+
+   All the three PVs are put together in a Volume Group where in this case the name of the volume group is webdata-vg using the command sudo vgcreate webdata-vg /dev/xvdh1 /dev/xvdg1 /dev/xvdf1
+with sudo vgs being used as a command to check if VG hass been created susscessfully.
+
+Lv is a utility used to create Logical volumes to be used on the data base  that is db-lv (n used to store data for the databse while the lv-logs will be used to store data for logs.
+
+ Fot these to be acchieved , we use the commands below with sudo lvs being used tio check if the Logical volume has been created sucessfully .
+
+- sudo lvcreate -n db-lv -L 14G webdata-vg
+
+- sudo lvcreate -n logs-lv -L 14G webdata-vg
+
+ sudo vgdisplay -v #view complete setup - VG, PV, and LV
+
+sudo lsblk 
+ These two commands are used to veryfy the entire set up.
+
+ ## ext4 file system 
+
+  This is a format used the logical volumes  using the commands below.
+ 
+ - sudo mkfs -t ext4 /dev/webdata-vg/db-lv
+ - 
+ - sudo mkfs -t ext4 /dev/webdata-vg/logs-lv
+
+# Website file storage and logs backup.
+ 
+ Happens in /db/ directory while backup for log data is 
+ 
+ stored in /home/recovery/logs
+
+  These two directories are created using the commands 
+
+  - sudo mkdir -p /db
+
+  - sudo mkdir -p /home/recovery/logs
 
  
 
+ ## Mount and rsync utilities.
 
- 
+  These are utilities used  to
+
+ " sudo mount /dev/webdata-vg/db-lv /var/www/html/2"  mounts logical volumes
+
+ "sudo rsync -av /var/log/. /home/recovery/logs/ " used to backup all the 
+   
+   log directory /var/log into home/recovery/logs/
+
+   "sudo mount /dev/webdata-vg/logs-lv /var/log" mounts var/logs on logs-lv 
+   
+   logical volume
+
+   " sudo rsync -av /home/recovery/logs/log/. /var/log "restore log file back
+
+    into /var/log
+
+# Persist
+    sudo blkid is a command used to get the UUID of the  device which is used too configure the file  /etc/fstab which helps in of the data even after the database server  has been restarted with the command sudo vi /etc/fstab .
+
+  To test confuguration and reload daemon , we use the commands below as well as verfy the whole set up. the as demonstrated below by the three commands running consecutively.
+sudo mount -a
+sudo systemctl daemon-reload
+df -h
+   
+With the set of commands below, we are able to confugure DB to work with wordpress .
+ sudo mysql
+CREATE DATABASE wordpress;
+CREATE USER `myuser`@`<Web-Server-Private-IP-Address>` IDENTIFIED BY 'mypass';
+GRANT ALL ON wordpress.* TO 'myuser'@'<Web-Server-Private-IP-Address>';
+FLUSH PRIVILEGES;
+SHOW DATABASES;
+exit
+
+# Configure wordpress to connect to remote database 
+
+ By opening mysql port 3306 and the sourse as the subnet value fromm the webserver.
+
+ # Installing Mysql -client and connect to the webserver .
+
+  Commands below are used to achieve the above .
+
+ sudo yum install mysql
+sudo mysql -u admin -p -h <DB-Server-Private-IP-address>
+
+ Run command show databases on mysql  to verify the connection.
+
+  Change premissions and configurations so as apache can use  Wordpress.
+
+  ![mysql client](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/2389dc21-ad85-4f7c-be7d-b476da2ab9ef)
+
+
+   Lastly enablre TCP port 80 on the inbound rules of the webserver  and enable everywhere at 0.0.0.0/0
+
+    Access the link to the Wordpress.
    
 
 
