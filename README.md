@@ -2,6 +2,7 @@
 
 ## Implementing wordpress website with lvm storage
 
+
 # SETTING UP THE WORDPRESS WEBSERVER.
 
 -  Creating a webserver instance
@@ -41,11 +42,11 @@ Using df -h command, we check the mounts and spaces on the webserver  as demonst
 
 All these has been demonstrated on the screenshots below.
 
- # sudo gdisk /dev/xdf
+ ## sudo gdisk /dev/xdf
 
 ![gdisk dev xvdf](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/3494641e-bc1e-44c1-967a-1afb4b2de59e)
 
- # sudo gdisk /dev/xdg
+ ## sudo gdisk /dev/xdg
 
 ![gdisk dev xvdg](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/4b3f6517-740d-48a4-a670-f11930ceb490)
 
@@ -121,7 +122,7 @@ set up for VG,PV and LV.
 
 ![vieweng completeset up and blocks](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/5b2df3c2-40e0-42a8-b923-98841f2c09b9)
 
-# ext4 filesystem
+## ext4 filesystem
 
  - sudo mkfs -t ext4 /dev/webdata-vg/apps-lv
 
@@ -170,7 +171,7 @@ set up for VG,PV and LV.
 
 ![mount and rsync logs lv](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/87f4ca72-daf1-49c4-b266-7c7ce327e60f)
 
-# Persist
+## Persist
 
  updating the /etc/fstab file  helps maintain(persist) the mount 
  
@@ -264,13 +265,14 @@ sudo rm -rf latest.tar.gz
  ![restart httpd and  download wordpress](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/5cc1835d-06e4-4cb6-a866-0b37f8b290b7)
 
 
-# Configure SELinux Policies.
+## Configure SELinux Policies.
 
    sudo chown -R apache:apache /var/www/html/wordpress
  sudo chcon -t httpd_sys_rw_content_t /var/www/html/wordpress -R
  sudo setsebool -P httpd_can_network_connect=1
 
 ![SELinux](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/2c6956ac-5a79-4f79-8737-47916a56d343)
+
 
 
 # SETTING UP THE DATABASE SERVER .
@@ -398,7 +400,7 @@ sudo lsblk
 ![ext4 db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/ce357088-195a-4980-b491-fec67911df0c)
 
 
-# Website file storage and logs backup.
+## Website file storage and logs backup.
  
  Happens in /db/ directory while backup for log data is 
  
@@ -433,7 +435,7 @@ sudo lsblk
     
 ![mount rysnc db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/684b261e-7af0-4169-91c4-382ef0138962)
 
-# Persist
+## Persist
     sudo blkid is a command used to get the UUID of the  device which is used too configure the file  /etc/fstab which 
     
     helps in of the data even after the database server  has been restarted with the command sudo vi /etc/fstab .
@@ -466,7 +468,7 @@ exit
 
 ![database ,ownership, mysql](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/8a9e3472-d121-471c-8b8e-51adc57bd095)
 
-# Configure wordpress to connect to remote database 
+## Configure wordpress to connect to remote database 
 
  By opening mysql port 3306 and the sourse as the subnet value fromm the webserver ie 172.31.32.0/20 in this case .
 
@@ -475,7 +477,7 @@ exit
 
  
 
- # Installing Mysql -client and connect to the webserver .
+ ## Installing Mysql -client and connect to the webserver .
 
   Commands below are used to achieve the above .
 
