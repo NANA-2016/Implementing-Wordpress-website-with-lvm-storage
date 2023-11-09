@@ -265,6 +265,7 @@ sudo rm -rf latest.tar.gz
 
 
 # Configure SELinux Policies.
+
    sudo chown -R apache:apache /var/www/html/wordpress
  sudo chcon -t httpd_sys_rw_content_t /var/www/html/wordpress -R
  sudo setsebool -P httpd_can_network_connect=1
@@ -297,12 +298,17 @@ sudo rm -rf latest.tar.gz
    ![lsblk ls dev db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/86a4ec6e-f180-4a99-8e47-5e879cdd74cc)
 
 
- df -h is a command that is used to help us get to know all the soace that is availablre for use for the database set up.
+ df -h is a command that is used to help us get to know all the soace that is availablre for use for the database set 
+ 
+ up.
  
 ![df -h db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/d00274cf-efe9-4b6b-9b90-853ee16234a4)
 
 
-  Each disk needs a partition to be created and the command  sudo gdisk is used for all the blocks that have been creates eruniing as 
+  Each disk needs a partition to be created and the command  sudo gdisk is used for all the blocks that have been 
+  
+  created  to run as 
+  
   - sudo gdisk /dev/xvdf
 
     ![gdisk 1 db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/5b241c56-a886-4a89-9c1f-59f097166e84)
@@ -323,13 +329,19 @@ sudo rm -rf latest.tar.gz
     ![lsblk](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/ba6a4545-bb11-4324-a24d-f78096781495)
 
 
-As it is with the webserver in the database server as well we need to install lvm2  and using the command  sudo lvmdiskscan, we are able to check  the available partitions.
+As it is with the webserver in the database server as well we need to install lvm2  and using the command  sudo 
+
+lvmdiskscan, we are able to check  the available partitions.
+
+
+![lvm diskscan db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/d7ae925e-c9fe-4736-a13a-5b0f0bba8801)
 
 
 
-
-
- After the disk have been created, tthey can now be set as physical volumes using the three command s below jst as it was with the webserver .
+ After the disk have been created, tthey can now be set as physical volumes using the three command s below jst as it 
+ 
+ was with the webserver .
+ 
  - sudo pvcreate /dev/xvdf1
    
 -  sudo pvcreate /dev/xvdg1
@@ -341,21 +353,39 @@ As it is with the webserver in the database server as well we need to install lv
   ![pvs](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/2d6e4b4d-7ad1-4ca5-ba37-ee44eb462238)
 
 
-   All the three PVs are put together in a Volume Group where in this case the name of the volume group is webdata-vg using the command sudo vgcreate webdata-vg /dev/xvdh1 /dev/xvdg1 /dev/xvdf1
-with sudo vgs being used as a command to check if VG hass been created susscessfully.
+   All the three PVs are put together in a Volume Group where in this case the name of the volume group is webdata-vg 
+   
+   using the command "sudo vgcreate webdata-vg /dev/xvdh1 /dev/xvdg1 /dev/xvdf1"
+   
+with "sudo vgs "being used as a command to check if VG has been created susscessfully.
 
-Lv is a utility used to create Logical volumes to be used on the data base  that is db-lv (n used to store data for the databse while the lv-logs will be used to store data for logs.
+![sudo vgcreate](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/522b5f36-0806-45f1-85f7-eccb9eda400d)
 
- Fot these to be acchieved , we use the commands below with sudo lvs being used tio check if the Logical volume has been created sucessfully .
+
+
+Lv is a utility used to create Logical volumes to be used on the data base  that is db-lv  used to store data for the 
+
+databse while the lv-logs will be used to store data for logs.
+
+ Fot these to be acchieved , we use the commands below with sudo lvs being used tio check if the Logical volume has 
+ 
+ been created sucessfully .
 
 - sudo lvcreate -n db-lv -L 14G webdata-vg
 
 - sudo lvcreate -n logs-lv -L 14G webdata-vg
 
+![sudo lvs db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/2089ef90-f951-4deb-9935-396b59826d23)
+
+
  sudo vgdisplay -v #view complete setup - VG, PV, and LV
 
 sudo lsblk 
+
  These two commands are used to veryfy the entire set up.
+
+ ![complete set up lv,vg,pv db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/befe1335-e58e-4409-9512-f2b978780d25)
+
 
  ## ext4 file system 
 
@@ -364,6 +394,9 @@ sudo lsblk
  - sudo mkfs -t ext4 /dev/webdata-vg/db-lv
  - 
  - sudo mkfs -t ext4 /dev/webdata-vg/logs-lv
+
+![ext4 db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/ce357088-195a-4980-b491-fec67911df0c)
+
 
 # Website file storage and logs backup.
  
@@ -377,7 +410,8 @@ sudo lsblk
 
   - sudo mkdir -p /home/recovery/logs
 
- 
+ ![dg mkdir](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/c236df33-eecd-4cb7-863d-408d20b79853)
+
 
  ## Mount and rsync utilities.
 
@@ -396,16 +430,32 @@ sudo lsblk
    " sudo rsync -av /home/recovery/logs/log/. /var/log "restore log file back
 
     into /var/log
+    
+![mount rysnc db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/684b261e-7af0-4169-91c4-382ef0138962)
 
 # Persist
-    sudo blkid is a command used to get the UUID of the  device which is used too configure the file  /etc/fstab which helps in of the data even after the database server  has been restarted with the command sudo vi /etc/fstab .
+    sudo blkid is a command used to get the UUID of the  device which is used too configure the file  /etc/fstab which 
+    
+    helps in of the data even after the database server  has been restarted with the command sudo vi /etc/fstab .
 
-  To test confuguration and reload daemon , we use the commands below as well as verfy the whole set up. the as demonstrated below by the three commands running consecutively.
-sudo mount -a
-sudo systemctl daemon-reload
-df -h
+  ![blkid db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/833addf0-27c3-46f3-8f0a-c6659e1a66db)
+
+ ![etcfstab db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/25dd707c-a631-478d-b7c9-fbed4872d27c)
+
+  To test confuguration and reload daemon , we use the commands below as well as verfy the whole set up. the as 
+  
+  demonstrated below by the three commands running consecutively.
+- sudo mount -a
+
+- sudo systemctl daemon-reload
+
+- df -h
+
+![df -h, etc fstab db](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/a1ff2f96-770a-43e7-846a-3d12a33231c1)
+
    
 With the set of commands below, we are able to confugure DB to work with wordpress .
+
  sudo mysql
 CREATE DATABASE wordpress;
 CREATE USER `myuser`@`<Web-Server-Private-IP-Address>` IDENTIFIED BY 'mypass';
@@ -414,18 +464,29 @@ FLUSH PRIVILEGES;
 SHOW DATABASES;
 exit
 
+![database ,ownership, mysql](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/8a9e3472-d121-471c-8b8e-51adc57bd095)
+
 # Configure wordpress to connect to remote database 
 
- By opening mysql port 3306 and the sourse as the subnet value fromm the webserver.
+ By opening mysql port 3306 and the sourse as the subnet value fromm the webserver ie 172.31.32.0/20 in this case .
+
+ ![subnet bd](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/79fd2d46-3a7d-44ae-8380-9603869c2b7d)
+
+
+ 
 
  # Installing Mysql -client and connect to the webserver .
 
   Commands below are used to achieve the above .
 
- sudo yum install mysql
-sudo mysql -u admin -p -h <DB-Server-Private-IP-address>
+-  sudo yum install mysql
+ 
+-  sudo mysql -u admin -p -h <DB-Server-Private-IP-address>
 
  Run command show databases on mysql  to verify the connection.
+
+ ![test database on ws](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/983a5e62-94b4-4672-83db-1dfcb0b82b1f)
+
 
   Change premissions and configurations so as apache can use  Wordpress.
 
@@ -434,8 +495,14 @@ sudo mysql -u admin -p -h <DB-Server-Private-IP-address>
 
    Lastly enablre TCP port 80 on the inbound rules of the webserver  and enable everywhere at 0.0.0.0/0
 
+   ![tcp 80 webserver](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/e832f723-af1d-4131-9953-2c251e15527e)
+
+
     Access the link to the Wordpress.
-   
+
+    
+ ![http](https://github.com/NANA-2016/Implementing-Wordpress-website-with-lvm-storage/assets/141503408/909719f6-7bd3-441a-9faa-777af1a1064e)
+  
 
 
 
